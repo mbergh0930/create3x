@@ -278,66 +278,61 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Action Buttons Section */}
+        {/* Continue Session Button */}
         <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
           marginBottom: '2rem',
-          maxWidth: '600px',
-          margin: '0 auto 2rem auto'
+          textAlign: 'center'
         }}>
           <button style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            padding: '1rem',
-            background: 'var(--white)',
-            border: '2px solid var(--gray-300)',
-            borderRadius: '8px',
+            gap: '0.75rem',
+            padding: '1.25rem 2.5rem',
+            background: 'var(--primary-blue)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
             cursor: 'pointer',
-            fontSize: '1rem'
+            fontSize: '1.1rem',
+            fontWeight: '500',
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
           }}>
             <span>→</span> Continue Session
           </button>
-          
-          <button style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '1rem',
-            background: 'var(--white)',
-            border: '2px solid var(--gray-300)',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1rem'
-          }}>
-            <span>🏆</span> View Gallery
-          </button>
         </div>
 
-        {/* Stats and Sections */}
+        {/* Current Streak Section */}
+        <div style={{ 
+          background: 'var(--white)',
+          padding: '1.5rem',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          marginBottom: '2rem',
+          textAlign: 'center'
+        }}>
+          <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+            Current streak: <strong>3 days</strong>
+          </p>
+          <p style={{ color: 'var(--gray-600)', fontSize: '0.9rem' }}>
+            Show badges earned w/ tool/tip hover explanation
+          </p>
+        </div>
+
+        {/* Saved Drafts and Recent Sessions */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '2rem',
-          marginTop: '3rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '2rem'
         }}>
-          {/* Current Streak */}
-          <div style={{ 
-            background: 'var(--white)',
-            padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }}>
-            <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-              Current streak: <strong>3 days</strong>
-            </p>
-            <p style={{ color: 'var(--gray-600)', fontSize: '0.9rem' }}>
-              Show badges earned w/ tool/tip hover explanation
-            </p>
-          </div>
-
           {/* Saved Drafts */}
           <div style={{ 
             background: 'var(--white)',
@@ -366,25 +361,7 @@ const Dashboard = () => {
             borderRadius: '12px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginBottom: '1rem'
-            }}>
-              <h4>Recent Sessions</h4>
-              <button style={{
-                padding: '0.5rem 1rem',
-                background: 'var(--primary-blue)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '0.9rem',
-                cursor: 'pointer'
-              }}>
-                View Leaderboard
-              </button>
-            </div>
+            <h4 style={{ marginBottom: '1rem' }}>Recent Sessions</h4>
             <div style={{ 
               height: '80px', 
               background: 'var(--gray-100)', 
