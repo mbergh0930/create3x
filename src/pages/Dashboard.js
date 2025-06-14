@@ -57,17 +57,41 @@ const Dashboard = () => {
             </p>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
             <span style={{ color: 'var(--gray-700)' }}>
               Welcome, {userProfile?.displayName || user?.displayName || 'Michele'}!
             </span>
-            <button 
-              onClick={handleLogout}
-              className="btn btn-secondary"
-              style={{ fontSize: '0.9rem' }}
-            >
-              Sign Out
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+              <button style={{
+                padding: '0.5rem 1rem',
+                background: 'var(--primary-blue)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.9rem',
+                cursor: 'pointer'
+              }}>
+                View Gallery
+              </button>
+              <button style={{
+                padding: '0.5rem 1rem',
+                background: 'var(--accent-purple)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.9rem',
+                cursor: 'pointer'
+              }}>
+                Leaderboard
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.9rem' }}
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </header>
