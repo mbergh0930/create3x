@@ -14,11 +14,26 @@ const PreSessionFlow = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
 
-  // Get mode from URL params if provided
+  // Get mode and rounds from URL params if provided
   useEffect(() => {
     const mode = searchParams.get('mode');
+    const rounds = searchParams.get('rounds');
+    
     if (mode) {
       setSelectedMode(mode);
+    }
+    
+    if (rounds) {
+      const roundsNum = parseInt(rounds);
+      if (roundsNum >= 1 && roundsNum <= 5) {
+        setSelectedRounds(roundsNum);
+        // Skip directly to mode selection if we have both params
+        if (mode) {
+          setStep('mode');
+        } else {
+          setStep('rounds');
+        }
+      }
     }
   }, [searchParams]);
 
@@ -44,16 +59,30 @@ const PreSessionFlow = () => {
 
     try {
       setIsCreating(true);
-      console.log('Creating real session...', { mode, rounds: selectedRounds });
+      console.log('Creating session...', { mode, rounds: selectedRounds });
       
-      // Create real session with SessionContext
-      const config = {};
-      if (mode === 'master-artist') {
+      // Map mode names to what SessionContext expects
+      let sessionMode = mode;
+      let config = {};
+      
+      if (mode === 'inspire') {
+        sessionMode = 'inspire';
+      } else if (mode === 'masters') {
+        sessionMode = 'masters';
+        // For now, default to Van Gogh - later you can add artist selection
+        config.artistId = 'van-gogh';
+        config.artistFocus = 'all';
+      } else if (mode === 'play') {
+        sessionMode = 'inspire'; // Map old "play" to "inspire"
+      } else if (mode === 'play-and-journal') {
+        sessionMode = 'inspire'; // Map to inspire but keep journaling
+      } else if (mode === 'master-artist') {
+        sessionMode = 'masters';
         config.artistId = 'van-gogh';
         config.artistFocus = 'all';
       }
       
-      const session = await createSession(mode, config, selectedRounds);
+      const session = await createSession(sessionMode, config, selectedRounds);
       console.log('Session created successfully:', session);
       
       // Navigate to session flow
@@ -266,7 +295,7 @@ const PreSessionFlow = () => {
                 maxWidth: '800px',
                 margin: '0 auto'
               }}>
-                {/* Just Play Mode */}
+                {/* Inspire Me Mode */}
                 <div style={{ 
                   background: 'white',
                   borderRadius: '1rem',
@@ -289,7 +318,7 @@ const PreSessionFlow = () => {
                   </div>
                   
                   <h3 style={{ fontSize: '1.2rem', textAlign: 'center', marginBottom: '0.5rem', fontWeight: '600' }}>
-                    Just Play
+                    Inspire Me
                   </h3>
                   
                   <p style={{ 
@@ -299,11 +328,11 @@ const PreSessionFlow = () => {
                     fontSize: '0.9rem',
                     textAlign: 'left'
                   }}>
-                    Pure creative flow. Spin for elements and create without any pressure or documentation.
+                    Play with randomized colors, techniques, and mediums. Simple elements for creative exploration.
                   </p>
                   
                   <button 
-                    onClick={() => handleModeSelection('play')}
+                    onClick={() => handleModeSelection('inspire')}
                     style={{ 
                       width: '100%',
                       padding: '0.75rem',
@@ -315,64 +344,11 @@ const PreSessionFlow = () => {
                     }}
                     disabled={isCreating}
                   >
-                    {isCreating ? 'Creating Session...' : 'Choose Just Play'}
+                    {isCreating ? 'Creating Session...' : 'Choose Inspire Me'}
                   </button>
                 </div>
 
-                {/* Play & Journal Mode */}
-                <div style={{ 
-                  background: 'white',
-                  borderRadius: '1rem',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  border: '1px solid #e5e7eb',
-                  padding: '2rem'
-                }}>
-                  <div style={{ 
-                    width: '50px', 
-                    height: '50px', 
-                    background: 'linear-gradient(135deg, #8b5cf6, #dc2626)', 
-                    borderRadius: '50%',
-                    margin: '0 auto 1rem auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.3rem'
-                  }}>
-                    📝
-                  </div>
-                  
-                  <h3 style={{ fontSize: '1.2rem', textAlign: 'center', marginBottom: '0.5rem', fontWeight: '600' }}>
-                    Play & Journal
-                  </h3>
-                  
-                  <p style={{ 
-                    color: '#6b7280',
-                    marginBottom: '1rem',
-                    lineHeight: '1.6',
-                    fontSize: '0.9rem',
-                    textAlign: 'left'
-                  }}>
-                    Reflect on each step and track your creative growth with optional journaling.
-                  </p>
-                  
-                  <button 
-                    onClick={() => handleModeSelection('play-and-journal')}
-                    style={{ 
-                      width: '100%',
-                      padding: '0.75rem',
-                      backgroundColor: '#8b5cf6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      cursor: 'pointer'
-                    }}
-                    disabled={isCreating}
-                  >
-                    {isCreating ? 'Creating Session...' : 'Choose Play & Journal'}
-                  </button>
-                </div>
-
-                {/* Study Masters Mode */}
+                {/* Explore the Masters Mode */}
                 <div style={{ 
                   background: 'white',
                   borderRadius: '1rem',
@@ -395,7 +371,7 @@ const PreSessionFlow = () => {
                   </div>
                   
                   <h3 style={{ fontSize: '1.2rem', textAlign: 'center', marginBottom: '0.5rem', fontWeight: '600' }}>
-                    Study Masters
+                    Explore the Masters
                   </h3>
                   
                   <p style={{ 
@@ -409,7 +385,7 @@ const PreSessionFlow = () => {
                   </p>
                   
                   <button 
-                    onClick={() => handleModeSelection('master-artist')}
+                    onClick={() => handleModeSelection('masters')}
                     style={{ 
                       width: '100%',
                       padding: '0.75rem',
@@ -421,7 +397,7 @@ const PreSessionFlow = () => {
                     }}
                     disabled={isCreating}
                   >
-                    {isCreating ? 'Creating Session...' : 'Choose Study Masters'}
+                    {isCreating ? 'Creating Session...' : 'Choose Explore Masters'}
                   </button>
                 </div>
               </div>
