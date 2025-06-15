@@ -16,6 +16,58 @@ export const useSession = () => {
 
 // Creative content database
 const CONTENT = {
+  // Simple colors for "Inspire Me" mode
+  inspireColors: {
+    'red': { name: 'Red', category: 'warm' },
+    'orange': { name: 'Orange', category: 'warm' },
+    'yellow': { name: 'Yellow', category: 'warm' },
+    'green': { name: 'Green', category: 'cool' },
+    'blue': { name: 'Blue', category: 'cool' },
+    'indigo': { name: 'Indigo', category: 'cool' },
+    'purple': { name: 'Purple', category: 'cool' },
+    'pink': { name: 'Pink', category: 'warm' },
+    'peach': { name: 'Peach', category: 'warm' },
+    'turquoise': { name: 'Turquoise', category: 'cool' },
+    'teal': { name: 'Teal', category: 'cool' },
+    'black': { name: 'Black', category: 'neutral' },
+    'white': { name: 'White', category: 'neutral' },
+    'brown': { name: 'Brown', category: 'neutral' },
+    'gray': { name: 'Gray', category: 'neutral' }
+  },
+
+  // Simple techniques for "Inspire Me" mode
+  inspireTechniques: {
+    'splatter': { name: 'Splatter', description: 'Flick paint for texture' },
+    'drip': { name: 'Drip', description: 'Let paint flow down' },
+    'remove': { name: 'Remove', description: 'Take paint away to create' },
+    'fingers': { name: 'Fingers', description: 'Paint with your fingertips' },
+    'stencils': { name: 'Stencils', description: 'Use shapes to block paint' },
+    'stamps': { name: 'Stamps', description: 'Press objects into paint' },
+    'mark-making': { name: 'Mark Making', description: 'Create expressive marks' },
+    'blot': { name: 'Blot', description: 'Press and lift for texture' },
+    'scratch': { name: 'Scratch', description: 'Scrape through wet paint' },
+    'dab': { name: 'Dab', description: 'Gentle pressing motions' },
+    'swirl': { name: 'Swirl', description: 'Circular mixing motions' },
+    'layer': { name: 'Layer', description: 'Build up transparent layers' }
+  },
+
+  // Simple mediums for "Inspire Me" mode  
+  inspireMediums: {
+    'paper': { name: 'Paper', type: 'surface' },
+    'watercolor': { name: 'Watercolor', type: 'paint' },
+    'acrylic': { name: 'Acrylic', type: 'paint' },
+    'ink': { name: 'Ink', type: 'liquid' },
+    'spray': { name: 'Spray Paint', type: 'paint' },
+    'crayon': { name: 'Crayon', type: 'waxy' },
+    'gesso': { name: 'Gesso', type: 'primer' },
+    'charcoal': { name: 'Charcoal', type: 'drawing' },
+    'pastel': { name: 'Pastel', type: 'drawing' },
+    'marker': { name: 'Marker', type: 'drawing' },
+    'pencil': { name: 'Colored Pencil', type: 'drawing' },
+    'chalk': { name: 'Chalk', type: 'drawing' }
+  },
+
+  // Professional colors for Master Artists mode
   colors: {
     'ultramarine-blue': { name: 'Ultramarine Blue', category: 'blue', intensity: 'vibrant' },
     'cadmium-yellow': { name: 'Cadmium Yellow', category: 'yellow', intensity: 'bright' },
@@ -67,7 +119,7 @@ const CONTENT = {
   }
 };
 
-// Master artists database (simplified for now)
+// Master artists database
 const ARTISTS = {
   'van-gogh': {
     name: 'Vincent van Gogh',
@@ -78,7 +130,7 @@ const ARTISTS = {
   'monet': {
     name: 'Claude Monet',
     colors: ['cerulean-blue', 'cadmium-yellow', 'alizarin-crimson', 'viridian'],
-    techniques: ['alla-prima', 'broken-color'],
+    techniques: ['alla-prima', 'wet-on-wet'],
     mediums: ['oil-paint']
   },
   'picasso': {
@@ -100,19 +152,19 @@ export const SessionProvider = ({ children }) => {
   };
 
   // Create new session
-  const createSession = async (mode, config = {}) => {
+  const createSession = async (mode, config = {}, plannedTurns = null) => {
     if (!user) throw new Error('User must be logged in to create session');
 
     try {
-      // Generate random number of turns (3-8)
-      const plannedTurns = Math.floor(Math.random() * 6) + 3;
+      // Use provided turns or generate random (3-7)
+      const finalTurns = plannedTurns || Math.floor(Math.random() * 5) + 3;
 
       const sessionData = {
         userId: user.uid,
-        mode, // 'play', 'play-and-journal', 'master-artist'
+        mode, // 'inspire', 'masters', 'play', 'play-and-journal', 'master-artist'
         artistId: config.artistId || null,
-        artistFocus: config.artistFocus || 'all', // 'all', 'colors-only', 'techniques-only', 'mediums-only'
-        plannedTurns,
+        artistFocus: config.artistFocus || 'all',
+        plannedTurns: finalTurns,
         completedTurns: 0,
         currentTurn: 1,
         turns: [],
@@ -149,23 +201,38 @@ export const SessionProvider = ({ children }) => {
     if (!currentSession) throw new Error('No active session');
 
     try {
-      let availableColors = Object.keys(CONTENT.colors);
-      let availableTechniques = Object.keys(CONTENT.techniques);
-      let availableMediums = Object.keys(CONTENT.mediums);
+      let availableColors, availableTechniques, availableMediums;
 
-      // Apply artist constraints if in master-artist mode
-      if (currentSession.mode === 'master-artist' && currentSession.artistId) {
-        const artist = ARTISTS[currentSession.artistId];
-        
-        if (currentSession.artistFocus === 'colors-only' || currentSession.artistFocus === 'all') {
-          availableColors = artist.colors;
+      // Choose data source based on mode
+      if (currentSession.mode === 'inspire') {
+        availableColors = Object.keys(CONTENT.inspireColors);
+        availableTechniques = Object.keys(CONTENT.inspireTechniques);
+        availableMediums = Object.keys(CONTENT.inspireMediums);
+      } else if (currentSession.mode === 'masters' || currentSession.mode === 'master-artist') {
+        // For masters mode, use artist-specific data
+        availableColors = Object.keys(CONTENT.colors);
+        availableTechniques = Object.keys(CONTENT.techniques);
+        availableMediums = Object.keys(CONTENT.mediums);
+
+        // Apply artist constraints if artist is selected
+        if (currentSession.artistId) {
+          const artist = ARTISTS[currentSession.artistId];
+          
+          if (currentSession.artistFocus === 'colors-only' || currentSession.artistFocus === 'all') {
+            availableColors = artist.colors;
+          }
+          if (currentSession.artistFocus === 'techniques-only' || currentSession.artistFocus === 'all') {
+            availableTechniques = artist.techniques;
+          }
+          if (currentSession.artistFocus === 'mediums-only' || currentSession.artistFocus === 'all') {
+            availableMediums = artist.mediums;
+          }
         }
-        if (currentSession.artistFocus === 'techniques-only' || currentSession.artistFocus === 'all') {
-          availableTechniques = artist.techniques;
-        }
-        if (currentSession.artistFocus === 'mediums-only' || currentSession.artistFocus === 'all') {
-          availableMediums = artist.mediums;
-        }
+      } else {
+        // Default to inspire mode for other modes
+        availableColors = Object.keys(CONTENT.inspireColors);
+        availableTechniques = Object.keys(CONTENT.inspireTechniques);
+        availableMediums = Object.keys(CONTENT.inspireMediums);
       }
 
       const turnData = {
@@ -173,6 +240,7 @@ export const SessionProvider = ({ children }) => {
         color: getRandomElement(availableColors),
         technique: getRandomElement(availableTechniques),
         medium: getRandomElement(availableMediums),
+        artist: currentSession.artistId ? ARTISTS[currentSession.artistId].name : null,
         reflection: '',
         reflectionProvided: false,
         createdAt: new Date()
@@ -242,9 +310,6 @@ export const SessionProvider = ({ children }) => {
         finalReflectionProvided: !!finalReflection
       });
 
-      // Update user stats (simplified for now)
-      // TODO: Update user profile with completed session stats
-
       setCurrentSession(null);
       return updatedSession;
     } catch (error) {
@@ -255,6 +320,13 @@ export const SessionProvider = ({ children }) => {
 
   // Get content for display
   const getContentDisplay = (type, key) => {
+    // Choose the right content source based on session mode
+    if (currentSession && currentSession.mode === 'inspire') {
+      if (type === 'colors') return CONTENT.inspireColors[key] || { name: key };
+      if (type === 'techniques') return CONTENT.inspireTechniques[key] || { name: key };
+      if (type === 'mediums') return CONTENT.inspireMediums[key] || { name: key };
+    }
+    
     return CONTENT[type][key] || { name: key };
   };
 
